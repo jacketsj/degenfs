@@ -26,8 +26,11 @@ async function genBasicDataProofRequest(dataText) {
   const salt = await hashTextToDigest(toString(Math.random()));
   const pre_result = await hashTextToDigest(salt + dataText);
   const result = await hashTextToDigest(pre_result);
+  return (salt,result);
 }
 
 async function storeData(dataText, amt) {
   // store dataText by paying amt
+  salt, result = genBasicDataProofRequest(dataText);
+  // call api here
 }
