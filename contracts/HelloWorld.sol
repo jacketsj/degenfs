@@ -7,7 +7,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Store & retrieve value in a variable
  * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
  */
-contract HelloWorld {
+contract DeCloud {
 
     uint64 public id_count = 0;
 
@@ -19,7 +19,7 @@ contract HelloWorld {
     }
 
     mapping(uint64 => JobBid) public jobBids;
-    mapping(uint64 => address) public jobToCompleter;
+    mapping(uint64 => address payable) public jobToCompleter;
     mapping(uint64 => string) public outputLocs;
 
     function genUUID() public returns(uint64) {
@@ -30,16 +30,14 @@ contract HelloWorld {
      */
     function createJobBid(uint256 expiry, string memory job_loc) public payable {
         jobBids[genUUID()] = JobBid(msg.value, expiry, job_loc, msg.sender);
-        
-        // TODO put msg.value into contract wallet
     }
 
     function registerJobCompletion(uint64 jobId, string memory output_loc) public {
         // caller completed the job
         // should permanently store the location of the output
-        jobToCompleter[jobId] = msg.sender;
+        jobToCompleter[jobId] = payable(msg.sender);
         outputLocs[jobId] = output_loc;
-        // TODO pay the caller the amount for the job
-        // transfer(msg.sender, jobBids[jobId].amount);
+        // pay the caller the amount for the job
+        jobToCompleter[jobId].transfer(jobBids[jobId].amount);
     }
 }
