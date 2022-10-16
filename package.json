@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "alchemy-sdk": "^2.1.1",
+    "dotenv": "^16.0.3"
+  },
+  "name": "degenfs",
+  "version": "1.0.0",
+  "description": "decentralised cloud",
+  "main": "hash.js",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.0",
+    "ethers": "^5.7.1",
+    "hardhat": "^2.12.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacketsj/degenfs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacketsj/degenfs/issues"
+  },
+  "homepage": "https://github.com/jacketsj/degenfs#readme"
+}
