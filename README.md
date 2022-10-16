@@ -6,7 +6,7 @@ npx hardhat compile
 
 npx hardhat run scripts/deploy.js --network goerli
 
-# To run interact.js and see your ABI printed to the console navigate to your terminal and run
+# To run interact.js
 
 npx hardhat run scripts/interact.js
 

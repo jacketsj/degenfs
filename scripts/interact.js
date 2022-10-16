@@ -5,7 +5,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 
 const contract = require("../artifacts/contracts/HelloWorld.sol/HelloWorld.json");
-console.log(JSON.stringify(contract.abi));
+// console.log(JSON.stringify(contract.abi));
 
 /**
  * In order to interact with our contract we need to create an instance of it in our code.
@@ -32,3 +32,19 @@ const helloWorldContract = new ethers.Contract(
   contract.abi,
   signer
 );
+
+async function main() {
+  //1. read from smart contract state variable
+  //   const resp = await helloWorldContract.id_count();
+  //   console.log("The response is: " + resp);
+
+  //2. update smart contract
+  //   console.log("Creating a job bid..."); // mining process, might take a while
+  //   const tx = await helloWorldContract.createJobBid(2008, "google.com");
+  //   await tx.wait();
+
+  //3. read stored job bid
+  const resp = await helloWorldContract.jobBids(0);
+  console.log("The response is: " + resp);
+}
+main();
