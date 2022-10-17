@@ -7,7 +7,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Store & retrieve value in a variable
  * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
  */
-contract DeCloud {
+contract HelloWorld {
 
     uint64 public id_count = 0;
 
@@ -28,11 +28,14 @@ contract DeCloud {
     /**
      * @dev Store value in variable
      */
-    function createJobBid(uint256 expiry, string memory job_loc) public payable {
-        jobBids[genUUID()] = JobBid(msg.value, expiry, job_loc, msg.sender);
+    function createJobBid(uint256 expiry, string memory job_loc) public payable returns (uint64) {
+        uint64 uuid = genUUID();
+        jobBids[uuid] = JobBid(msg.value, expiry, job_loc, msg.sender);
+        return uuid;
     }
 
     function registerJobCompletion(uint64 jobId, string memory output_loc) public {
+        // TODO don't let this run if the job was already completed and paid for
         // caller completed the job
         // should permanently store the location of the output
         jobToCompleter[jobId] = payable(msg.sender);
