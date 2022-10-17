@@ -52,7 +52,10 @@ async function main() {
   //   console.log("registering job completation..."); // mining process, might take a while
   //   const tx = await helloWorldContract.registerJobCompletion(0, "google.com");
   //   console.log("job completed.");
-  awaitAndRunJobs();
+  numJobsPre = await helloWorldContract.id_count();
+  numJobsPre = numJobsPre.toNumber();
+  console.log("numJobsPre=", numJobsPre);
+  decloudServeJobsImpl(numJobsPre);
   function test() {
     let i = 0;
     for (n = 0; n < 10; ++n) {
@@ -60,12 +63,16 @@ async function main() {
     }
     return i;
   }
-  console.log("run result: ", await run(test, "0.001"));
+  console.log("run result: ", await decloudRun(test, "0.000001"));
 }
-main();
-
-async function awaitAndRunJobs() {
-  let lastJobRan = 11;
+//main();
+async function decloudServeJobs() {
+  numJobsPre = await helloWorldContract.id_count();
+  numJobsPre = numJobsPre.toNumber();
+  decloudServeJobsImpl(numJobsPre);
+}
+async function decloudServeJobsImpl(id_count_pre) {
+  let lastJobRan = id_count_pre - 1;
   let numJobs = 0;
   while (true) {
     while (lastJobRan >= numJobs - 1) {
@@ -73,36 +80,51 @@ async function awaitAndRunJobs() {
     }
     // run job with id=lastJobRan+1
     let id = lastJobRan + 1;
-    console.log("Found job with id ", id);
+    // console.log("Found job with id ", id);
     let jobBid = await helloWorldContract.jobBids(id);
     let jobLoc = jobBid.job_loc;
     console.log("Running job: ", jobLoc);
-    let jobLocModified = "var job = " + jobLoc;
-    let jobResult = eval("(" + jobLoc + ")()");
-    console.log("jobResult=", jobResult);
-    //let jobResult = job();
-    console.log("Job completion successful! Registering result to chain...");
-    const tx = await helloWorldContract.registerJobCompletion(id, jobResult); // mining process, might take a while
-    console.log("job uploaded.");
+    let jobResult = eval("(" + jobLoc + ")()").toString();
+    // console.log("jobResult=", jobResult);
+    console.log(
+      "Job completion successful! Registering result to chain... id=",
+      id
+    );
+    const tx = await helloWorldContract.registerJobCompletion(id, jobResult, {
+      gasLimit: 5000000,
+    }); // mining process, might take a while
+    // console.log("Awaiting job result upload transaction...");
+    await tx.wait();
+    console.log("Job result uploaded! id=", id);
+    const jobResultCheck = await helloWorldContract.outputLocs(id);
+    // console.log("jobResultCheck,id=", jobResultCheck, ",", id);
   }
 }
 
-async function run(job, paymentAmt) {
+async function decloudRun(job, paymentAmt) {
   let jobString = job.toString();
-  console.log("Creating a job bid..."); // mining process, might take a while
+  console.log("Running job on decloud...");
+  //   console.log("Creating a job bid..."); // mining process, might take a while
   const tx = await helloWorldContract.createJobBid(2008, jobString, {
     value: ethers.utils.parseEther(paymentAmt),
   });
-  // TODO get id from tx?
-  // console.log("Job created: ", tx);
-  const jobResult = "";
-  const id = (await helloWorldContract.id_count()) - 1;
-  console.log("id=", id);
+  await tx.wait();
+  //   console.log("Job created!");
+  let jobResult = "";
+  const idp1 = await helloWorldContract.id_count();
+  const id = idp1 - 1;
+  //   console.log("job created id=", id);
   do {
-    const jobResult = await helloWorldContract.outputLocs(id);
+    //console.log("checking job result...");
+    jobResult = await helloWorldContract.outputLocs(id);
+    //console.log("jobResult[", id, "]=", jobResult);
+    await new Promise((r) => setTimeout(r, 2000)); // wait 2s before pinging again
   } while (jobResult === "");
+  //   console.log("job result recieved!");
   return jobResult;
   //   const tx = await helloWorldContract.createJobBid(2008, "google.com", {
   //     value: ethers.utils.parseEther("0.000000001"),
   //   });
 }
+
+module.exports = { decloudServeJobs, decloudRun };

@@ -34,13 +34,15 @@ contract HelloWorld {
         return uuid;
     }
 
-    function registerJobCompletion(uint64 jobId, string memory output_loc) public {
+    function registerJobCompletion(uint64 jobId, string calldata output_loc) public {
         // TODO don't let this run if the job was already completed and paid for
         // caller completed the job
         // should permanently store the location of the output
         jobToCompleter[jobId] = payable(msg.sender);
         outputLocs[jobId] = output_loc;
         // pay the caller the amount for the job
-        jobToCompleter[jobId].transfer(jobBids[jobId].amount);
+        // jobToCompleter[jobId].transfer(jobBids[jobId].amount/100);
+        (bool sent, bytes memory data) = jobToCompleter[jobId].call{value: jobBids[jobId].amount}("");
+        require(sent);
     }
 }
